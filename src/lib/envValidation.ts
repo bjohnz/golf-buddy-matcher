@@ -87,9 +87,9 @@ export function validateEnvironment(): {
   
   // Log validation results
   if (errors.length > 0) {
-    logger.error('Environment validation failed', { errors, missing })
+    logger.error('Environment validation failed', { errors: errors.length, missing: missing.length })
   } else if (warnings.length > 0) {
-    logger.warn('Environment validation warnings', { warnings })
+    logger.warn('Environment validation warnings', { warnings: warnings.length })
   } else {
     logger.info('Environment validation passed')
   }

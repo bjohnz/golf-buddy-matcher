@@ -290,7 +290,7 @@ export class ProfileService {
 
       // Update completion tracking in database (real client only)
       try {
-        const result = await (supabase as { from(table: string): { upsert(data: unknown, options: { onConflict: string }): Promise<{ error: unknown }> } })
+        const result = await (supabase as unknown as { from(table: string): { upsert(data: unknown, options: { onConflict: string }): Promise<{ error: unknown }> } })
           .from('profile_completion')
           .upsert(completionData, { onConflict: 'profile_id' })
         
@@ -322,8 +322,17 @@ export class ProfileService {
 
       // Extract old and new values for changed fields
       updatedFields.forEach(field => {
-        oldValues[field] = oldProfile[field as keyof UserProfile]
-        newValues[field] = newProfile[field as keyof UserProfile]
+        const oldValue = oldProfile[field as keyof UserProfile]
+        const newValue = newProfile[field as keyof UserProfile]
+        
+        // Only store primitive values and arrays, skip complex objects
+        if (typeof oldValue === 'string' || typeof oldValue === 'number' || typeof oldValue === 'boolean' || Array.isArray(oldValue) || oldValue === null || oldValue === undefined) {
+          oldValues[field] = oldValue
+        }
+        
+        if (typeof newValue === 'string' || typeof newValue === 'number' || typeof newValue === 'boolean' || Array.isArray(newValue) || newValue === null || newValue === undefined) {
+          newValues[field] = newValue
+        }
       })
 
       const logEntry: ProfileUpdateLog = {
@@ -343,7 +352,7 @@ export class ProfileService {
 
       // Insert update log into database (real client only)
       try {
-        const result = await (supabase as { from(table: string): { insert(data: unknown[]): Promise<{ error: unknown }> } })
+        const result = await (supabase as unknown as { from(table: string): { insert(data: unknown[]): Promise<{ error: unknown }> } })
           .from('profile_update_logs')
           .insert([logEntry])
         
@@ -430,7 +439,7 @@ export class ProfileService {
 
       // Query update history from database (real client only)
       try {
-        const result = await (supabase as { from(table: string): { select(columns: string): { eq(column: string, value: string): { order(column: string, options: { ascending: boolean }): { limit(count: number): Promise<{ error: unknown; data: unknown }> } } } } })
+        const result = await (supabase as unknown as any)
           .from('profile_update_logs')
           .select('*')
           .eq('profile_id', userId)

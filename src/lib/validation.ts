@@ -324,7 +324,7 @@ export function validateProfileData(data: Record<string, unknown>): ProfileValid
   const sanitizedData: Record<string, string | number | boolean | string[] | null | undefined> = {}
   
   // Validate name
-  if (data.full_name !== undefined) {
+  if (data.full_name !== undefined && data.full_name !== null && typeof data.full_name === 'string') {
     const nameResult = validateName(data.full_name)
     if (!nameResult.isValid) {
       errors.full_name = nameResult.error!
@@ -334,7 +334,7 @@ export function validateProfileData(data: Record<string, unknown>): ProfileValid
   }
   
   // Validate age
-  if (data.age !== undefined) {
+  if (data.age !== undefined && data.age !== null && (typeof data.age === 'string' || typeof data.age === 'number')) {
     const ageResult = validateAge(data.age)
     if (!ageResult.isValid) {
       errors.age = ageResult.error!
@@ -344,7 +344,7 @@ export function validateProfileData(data: Record<string, unknown>): ProfileValid
   }
   
   // Validate bio
-  if (data.bio !== undefined) {
+  if (data.bio !== undefined && data.bio !== null && typeof data.bio === 'string') {
     const bioResult = validateBio(data.bio)
     if (!bioResult.isValid) {
       errors.bio = bioResult.error!
@@ -354,7 +354,7 @@ export function validateProfileData(data: Record<string, unknown>): ProfileValid
   }
   
   // Validate handicap
-  if (data.handicap !== undefined) {
+  if (data.handicap !== undefined && data.handicap !== null && (typeof data.handicap === 'string' || typeof data.handicap === 'number')) {
     const handicapResult = validateHandicap(data.handicap)
     if (!handicapResult.isValid) {
       errors.handicap = handicapResult.error!
@@ -364,7 +364,7 @@ export function validateProfileData(data: Record<string, unknown>): ProfileValid
   }
   
   // Validate location
-  if (data.location !== undefined) {
+  if (data.location !== undefined && data.location !== null && typeof data.location === 'string') {
     const locationResult = validateLocation(data.location)
     if (!locationResult.isValid) {
       errors.location = locationResult.error!
@@ -374,8 +374,10 @@ export function validateProfileData(data: Record<string, unknown>): ProfileValid
   }
   
   // Validate coordinates
-  if (data.latitude !== undefined && data.longitude !== undefined) {
-    const coordsResult = validateCoordinates(data.latitude, data.longitude)
+  if (data.latitude !== undefined && data.latitude !== null && data.longitude !== undefined && data.longitude !== null && 
+      (typeof data.latitude === 'string' || typeof data.latitude === 'number') && 
+      (typeof data.longitude === 'string' || typeof data.longitude === 'number')) {
+    const coordsResult = validateCoordinates(Number(data.latitude), Number(data.longitude))
     if (!coordsResult.isValid) {
       errors.coordinates = coordsResult.error!
     } else {
@@ -385,7 +387,7 @@ export function validateProfileData(data: Record<string, unknown>): ProfileValid
   }
   
   // Validate search radius
-  if (data.search_radius !== undefined) {
+  if (data.search_radius !== undefined && data.search_radius !== null && (typeof data.search_radius === 'string' || typeof data.search_radius === 'number')) {
     const radiusResult = validateSearchRadius(data.search_radius)
     if (!radiusResult.isValid) {
       errors.search_radius = radiusResult.error!
@@ -395,7 +397,7 @@ export function validateProfileData(data: Record<string, unknown>): ProfileValid
   }
   
   // Validate playing times
-  if (data.preferred_times !== undefined) {
+  if (data.preferred_times !== undefined && data.preferred_times !== null && Array.isArray(data.preferred_times)) {
     const timesResult = validatePlayingTimes(data.preferred_times)
     if (!timesResult.isValid) {
       errors.preferred_times = timesResult.error!
@@ -405,7 +407,7 @@ export function validateProfileData(data: Record<string, unknown>): ProfileValid
   }
   
   // Validate playing style
-  if (data.playing_style !== undefined) {
+  if (data.playing_style !== undefined && data.playing_style !== null && typeof data.playing_style === 'string') {
     const styleResult = validatePlayingStyle(data.playing_style)
     if (!styleResult.isValid) {
       errors.playing_style = styleResult.error!
@@ -415,7 +417,7 @@ export function validateProfileData(data: Record<string, unknown>): ProfileValid
   }
   
   // Validate pace of play
-  if (data.pace_of_play !== undefined) {
+  if (data.pace_of_play !== undefined && data.pace_of_play !== null && typeof data.pace_of_play === 'string') {
     const paceResult = validatePaceOfPlay(data.pace_of_play)
     if (!paceResult.isValid) {
       errors.pace_of_play = paceResult.error!
@@ -425,7 +427,7 @@ export function validateProfileData(data: Record<string, unknown>): ProfileValid
   }
   
   // Validate group size
-  if (data.preferred_group_size !== undefined) {
+  if (data.preferred_group_size !== undefined && data.preferred_group_size !== null && typeof data.preferred_group_size === 'string') {
     const sizeResult = validateGroupSize(data.preferred_group_size)
     if (!sizeResult.isValid) {
       errors.preferred_group_size = sizeResult.error!
@@ -454,7 +456,7 @@ export function validateProfileData(data: Record<string, unknown>): ProfileValid
   logger.security('profile_validation', undefined, {
     hasErrors: Object.keys(errors).length > 0,
     errorCount: Object.keys(errors).length,
-    fields: Object.keys(data)
+    fields: Object.keys(data).length
   })
   
   return {

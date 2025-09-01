@@ -107,29 +107,27 @@ export async function PATCH(request: NextRequest) {
       is_banned?: boolean;
       is_active?: boolean;
       updated_at: string;
-    } = {}
+    } = { updated_at: new Date().toISOString() }
     let logMessage = ''
 
     switch (action) {
       case 'ban':
-        updateData = { is_banned: true, is_active: false }
+        updateData = { ...updateData, is_banned: true, is_active: false }
         logMessage = `User banned${reason ? `: ${reason}` : ''}`
         break
       case 'unban':
-        updateData = { is_banned: false, is_active: true }
+        updateData = { ...updateData, is_banned: false, is_active: true }
         logMessage = 'User unbanned'
         break
       case 'suspend':
-        updateData = { is_active: false }
+        updateData = { ...updateData, is_active: false }
         logMessage = `User suspended${reason ? `: ${reason}` : ''}`
         break
       case 'activate':
-        updateData = { is_active: true, is_banned: false }
+        updateData = { ...updateData, is_active: true, is_banned: false }
         logMessage = 'User activated'
         break
     }
-
-    updateData.updated_at = new Date().toISOString()
 
     const { data: user, error } = await supabase
       .from('profiles')

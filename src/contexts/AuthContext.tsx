@@ -9,8 +9,8 @@ interface AuthContextType {
   user: User | null
   session: Session | null
   loading: boolean
-  signIn: (email: string, password: string) => Promise<{ data?: { user: User; session: Session } | null; error?: AuthError }>
-  signUp: (email: string, password: string, userData?: { email: string; password: string; metadata?: Record<string, unknown> }) => Promise<{ data?: { user: User; session: Session } | null; error?: AuthError }>
+  signIn: (email: string, password: string) => Promise<{ data?: { user: User; session: Session | null } | null; error?: AuthError }>
+  signUp: (email: string, password: string, userData?: { fullName?: string; email?: string; password?: string; metadata?: Record<string, unknown> }) => Promise<{ data?: { user: User; session: Session | null } | null; error?: AuthError }>
   signOut: () => Promise<{ error?: AuthError }>
   resetPassword: (email: string) => Promise<{ error?: AuthError }>
   isAuthenticated: boolean
@@ -118,8 +118,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: email,
           user_metadata: { full_name: 'Development User' }
         }
-        setUser(mockUser as User)
-        return { data: { user: mockUser } }
+        setUser(mockUser as unknown as User)
+        return { data: { user: mockUser as unknown as User, session: null } }
       }
     } catch (error) {
       logger.error('Sign in error', error)
@@ -127,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const signUp = async (email: string, password: string, userData?: { fullName?: string; [key: string]: unknown }) => {
+  const signUp = async (email: string, password: string, userData?: { fullName?: string; email?: string; password?: string; metadata?: Record<string, unknown> }) => {
     try {
       logger.security('sign_up_attempt', email)
       
@@ -162,8 +162,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             ...userData
           }
         }
-        setUser(mockUser as User)
-        return { data: { user: mockUser } }
+        setUser(mockUser as unknown as User)
+        return { data: { user: mockUser as unknown as User, session: null } }
       }
     } catch (error) {
       logger.error('Sign up error', error)

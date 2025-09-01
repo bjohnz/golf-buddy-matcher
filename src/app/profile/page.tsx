@@ -139,7 +139,7 @@ export default function ProfilePage() {
       setSaving(true)
       
       // Comprehensive validation using validation utility
-      const validationResult = validateProfileData(formData)
+      const validationResult = validateProfileData(formData as unknown as Record<string, unknown>)
       
       if (!validationResult.isValid) {
         // Show first validation error
@@ -150,8 +150,8 @@ export default function ProfilePage() {
       
       // Prepare update data using sanitized values
       const updateData: ProfileUpdateData = {
-        full_name: validationResult.sanitizedData.full_name || formData.full_name,
-        bio: validationResult.sanitizedData.bio || formData.bio,
+        full_name: (validationResult.sanitizedData.full_name as string) || formData.full_name,
+        bio: (validationResult.sanitizedData.bio as string) || formData.bio,
         handicap: formData.handicap,
         home_course: formData.home_course,
         location: formData.location,

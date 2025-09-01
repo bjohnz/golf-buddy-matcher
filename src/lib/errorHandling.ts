@@ -56,17 +56,18 @@ export function sanitizeErrorMessage(error: unknown): string {
   }
   
   if (error && typeof error === 'object') {
-    if (error.message) {
-      return sanitizeString(error.message)
+    const errorObj = error as Record<string, unknown>
+    if (errorObj.message && typeof errorObj.message === 'string') {
+      return sanitizeString(errorObj.message)
     }
     
     // Handle different error object structures
-    if (error.error && error.error.message) {
-      return sanitizeString(error.error.message)
+    if (errorObj.error && typeof errorObj.error === 'object' && (errorObj.error as Record<string, unknown>).message) {
+      return sanitizeString((errorObj.error as Record<string, unknown>).message as string)
     }
     
-    if (error.details) {
-      return sanitizeString(error.details)
+    if (errorObj.details) {
+      return sanitizeString(String(errorObj.details))
     }
   }
   
@@ -110,7 +111,7 @@ export function createSafeError(
   
   // Log the full error securely on the server
   logger.error('Error occurred', error, {
-    context,
+    context: JSON.stringify(context),
     requestId,
     timestamp
   })
@@ -120,15 +121,16 @@ export function createSafeError(
   let safeMessage = userMessage || GENERIC_ERROR_MESSAGES.SERVER_ERROR
   
   if (error && typeof error === 'object') {
+    const errorObj = error as Record<string, unknown>
     // Handle known error types
-    if (error.type && SAFE_ERROR_TYPES[error.type as keyof typeof SAFE_ERROR_TYPES]) {
-      errorType = error.type
-      safeMessage = userMessage || error.message || safeMessage
+    if (errorObj.type && typeof errorObj.type === 'string' && SAFE_ERROR_TYPES[errorObj.type as keyof typeof SAFE_ERROR_TYPES]) {
+      errorType = errorObj.type as string
+      safeMessage = userMessage || (errorObj.message as string) || safeMessage
     }
     
     // Handle specific error patterns
-    if (error.message) {
-      const message = error.message.toLowerCase()
+    if (errorObj.message && typeof errorObj.message === 'string') {
+      const message = errorObj.message.toLowerCase()
       
       if (message.includes('validation') || message.includes('invalid')) {
         errorType = SAFE_ERROR_TYPES.VALIDATION
@@ -198,8 +200,8 @@ export function handleApiError(response: Response | { status?: number; statusTex
   const context: ErrorContext = {
     action: 'api_request',
     metadata: {
-      status: response?.status,
-      statusText: response?.statusText
+      status: response?.status?.toString() || '',
+      statusText: response?.statusText || ''
     }
   }
   

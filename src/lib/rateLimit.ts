@@ -259,7 +259,7 @@ export function createRateLimitMiddleware(action: keyof typeof RATE_LIMITS) {
     // Get identifier (IP address, user ID, etc.)
     const identifier = req.ip || 
                       req.connection?.remoteAddress || 
-                      req.headers['x-forwarded-for']?.split(',')[0] || 
+                      (typeof req.headers['x-forwarded-for'] === 'string' ? req.headers['x-forwarded-for'].split(',')[0] : Array.isArray(req.headers['x-forwarded-for']) ? req.headers['x-forwarded-for'][0] : undefined) || 
                       'unknown'
     
     const result = checkRateLimit(identifier, action)

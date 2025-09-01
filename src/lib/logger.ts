@@ -38,7 +38,7 @@ export const logger = {
   error: (message: string, error?: unknown, metadata?: Record<string, string | number | boolean>) => {
     const errorInfo = {
       message,
-      error: error?.message || error,
+      error: (error && typeof error === 'object' && 'message' in error ? (error as Record<string, unknown>).message : error),
       metadata: metadata || {},
       timestamp: new Date().toISOString()
     }
@@ -96,7 +96,7 @@ export function sanitizeForLogging(data: unknown): unknown {
     'ssn', 'creditCard', 'cvv', 'pin'
   ]
 
-  const sanitized = { ...data }
+  const sanitized = { ...data } as Record<string, unknown>
   
   for (const field of sensitiveFields) {
     if (field in sanitized) {
