@@ -9,8 +9,8 @@ interface AuthContextType {
   user: User | null
   session: Session | null
   loading: boolean
-  signIn: (email: string, password: string) => Promise<{ data?: any; error?: AuthError }>
-  signUp: (email: string, password: string, userData?: any) => Promise<{ data?: any; error?: AuthError }>
+  signIn: (email: string, password: string) => Promise<{ data?: { user: User; session: Session } | null; error?: AuthError }>
+  signUp: (email: string, password: string, userData?: { email: string; password: string; metadata?: Record<string, unknown> }) => Promise<{ data?: { user: User; session: Session } | null; error?: AuthError }>
   signOut: () => Promise<{ error?: AuthError }>
   resetPassword: (email: string) => Promise<{ error?: AuthError }>
   isAuthenticated: boolean
@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         // Check if we have a real Supabase client
         if ('getSession' in supabase.auth) {
-          const { data: { session }, error } = await (supabase.auth as any).getSession()
+          const { data: { session }, error } = await (supabase.auth as { getSession(): Promise<{ data: { session: Session | null }; error: AuthError | null }> }).getSession()
           
           if (error) {
             logger.error('Error getting initial session', error)
@@ -55,10 +55,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     getInitialSession()
 
     // Listen for auth changes (only with real client)
-    let subscription: any = null
+    let subscription: { unsubscribe: () => void } | null = null
     if ('onAuthStateChange' in supabase.auth) {
-      const { data } = (supabase.auth as any).onAuthStateChange(
-        async (event: string, session: any) => {
+      const { data } = (supabase.auth as { onAuthStateChange(callback: (event: string, session: Session | null) => void): { data: { subscription: { unsubscribe: () => void } } } }).onAuthStateChange(
+        async (event: string, session: Session | null) => {
           logger.security('auth_state_change', session?.user?.id, { event })
           
           setSession(session)
@@ -98,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Check if we have a real Supabase client
       if ('signInWithPassword' in supabase.auth) {
-        const { data, error } = await (supabase.auth as any).signInWithPassword({
+        const { data, error } = await (supabase.auth as { signInWithPassword(credentials: { email: string; password: string }): Promise<{ data: { user: User; session: Session } | null; error: AuthError | null }> }).signInWithPassword({
           email: email.toLowerCase().trim(),
           password
         })
@@ -118,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: email,
           user_metadata: { full_name: 'Development User' }
         }
-        setUser(mockUser as any)
+        setUser(mockUser as User)
         return { data: { user: mockUser } }
       }
     } catch (error) {
@@ -127,13 +127,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const signUp = async (email: string, password: string, userData?: any) => {
+  const signUp = async (email: string, password: string, userData?: { fullName?: string; [key: string]: unknown }) => {
     try {
       logger.security('sign_up_attempt', email)
       
       // Check if we have a real Supabase client
       if ('signUp' in supabase.auth) {
-        const { data, error } = await (supabase.auth as any).signUp({
+        const { data, error } = await (supabase.auth as { signUp(credentials: { email: string; password: string; options?: { data?: Record<string, unknown> } }): Promise<{ data: { user: User; session: Session } | null; error: AuthError | null }> }).signUp({
           email: email.toLowerCase().trim(),
           password,
           options: {
@@ -162,7 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             ...userData
           }
         }
-        setUser(mockUser as any)
+        setUser(mockUser as User)
         return { data: { user: mockUser } }
       }
     } catch (error) {
@@ -177,7 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Check if we have a real Supabase client
       if ('signOut' in supabase.auth) {
-        const { error } = await (supabase.auth as any).signOut()
+        const { error } = await (supabase.auth as { signOut(): Promise<{ error: AuthError | null }> }).signOut()
         
         if (error) {
           logger.error('Sign out error', error)
@@ -204,7 +204,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Check if we have a real Supabase client
       if ('resetPasswordForEmail' in supabase.auth) {
-        const { error } = await (supabase.auth as any).resetPasswordForEmail(email, {
+        const { error } = await (supabase.auth as { resetPasswordForEmail(email: string, options?: { redirectTo?: string }): Promise<{ error: AuthError | null }> }).resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/auth/reset-password`
         })
 

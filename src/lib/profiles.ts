@@ -34,8 +34,8 @@ export interface ProfileUpdateLog {
   id?: string
   profile_id: string
   updated_fields: string[]
-  old_values: Record<string, any>
-  new_values: Record<string, any>
+  old_values: Record<string, string | number | boolean | string[] | null | undefined>
+  new_values: Record<string, string | number | boolean | string[] | null | undefined>
   updated_at: string
   updated_by: string
 }
@@ -290,7 +290,7 @@ export class ProfileService {
 
       // Update completion tracking in database (real client only)
       try {
-        const result = await (supabase as any)
+        const result = await (supabase as { from(table: string): { upsert(data: unknown, options: { onConflict: string }): Promise<{ error: unknown }> } })
           .from('profile_completion')
           .upsert(completionData, { onConflict: 'profile_id' })
         
@@ -317,8 +317,8 @@ export class ProfileService {
   ): Promise<void> {
     try {
       const updatedFields = Object.keys(updates)
-      const oldValues: Record<string, any> = {}
-      const newValues: Record<string, any> = {}
+      const oldValues: Record<string, string | number | boolean | string[] | null | undefined> = {}
+      const newValues: Record<string, string | number | boolean | string[] | null | undefined> = {}
 
       // Extract old and new values for changed fields
       updatedFields.forEach(field => {
@@ -343,7 +343,7 @@ export class ProfileService {
 
       // Insert update log into database (real client only)
       try {
-        const result = await (supabase as any)
+        const result = await (supabase as { from(table: string): { insert(data: unknown[]): Promise<{ error: unknown }> } })
           .from('profile_update_logs')
           .insert([logEntry])
         
@@ -430,7 +430,7 @@ export class ProfileService {
 
       // Query update history from database (real client only)
       try {
-        const result = await (supabase as any)
+        const result = await (supabase as { from(table: string): { select(columns: string): { eq(column: string, value: string): { order(column: string, options: { ascending: boolean }): { limit(count: number): Promise<{ error: unknown; data: unknown }> } } } } })
           .from('profile_update_logs')
           .select('*')
           .eq('profile_id', userId)

@@ -567,7 +567,7 @@ export class SubscriptionService {
 
       if (error) throw error
 
-      return data.map((like: any) => ({
+      return data.map((like: { id: string; liker_id: string; liked_user_id: string; is_viewed: boolean; created_at: string }) => ({
         id: like.id,
         likerId: like.liker_id,
         likedUserId: like.liked_user_id,

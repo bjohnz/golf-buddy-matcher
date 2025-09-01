@@ -316,12 +316,12 @@ export function validateMessage(message: string): { isValid: boolean; sanitized:
 export interface ProfileValidationResult {
   isValid: boolean
   errors: Record<string, string>
-  sanitizedData: Record<string, any>
+  sanitizedData: Record<string, string | number | boolean | string[] | null | undefined>
 }
 
-export function validateProfileData(data: any): ProfileValidationResult {
+export function validateProfileData(data: Record<string, unknown>): ProfileValidationResult {
   const errors: Record<string, string> = {}
-  const sanitizedData: Record<string, any> = {}
+  const sanitizedData: Record<string, string | number | boolean | string[] | null | undefined> = {}
   
   // Validate name
   if (data.full_name !== undefined) {
@@ -464,7 +464,7 @@ export function validateProfileData(data: any): ProfileValidationResult {
   }
 }
 
-export default {
+const validation = {
   sanitizeText,
   sanitizeHTML,
   validateEmail,
@@ -484,3 +484,5 @@ export default {
   validateMessage,
   validateProfileData
 }
+
+export default validation

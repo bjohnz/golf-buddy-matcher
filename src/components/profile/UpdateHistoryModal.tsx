@@ -37,7 +37,7 @@ export default function UpdateHistoryModal({ userId, isOpen, onClose }: UpdateHi
     return field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
   }
 
-  const formatFieldValue = (value: any): string => {
+  const formatFieldValue = (value: string | number | boolean | string[] | null | undefined): string => {
     if (value === null || value === undefined) return 'Not set'
     if (typeof value === 'boolean') return value ? 'Yes' : 'No'
     if (Array.isArray(value)) return value.length > 0 ? value.join(', ') : 'None'

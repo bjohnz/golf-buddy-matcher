@@ -9,7 +9,7 @@ export const logger = {
   /**
    * Log informational messages (development only)
    */
-  dev: (message: string, data?: any) => {
+  dev: (message: string, data?: unknown) => {
     if (isDevelopment) {
       console.log(`[DEV] ${message}`, data || '')
     }
@@ -18,7 +18,7 @@ export const logger = {
   /**
    * Log general information
    */
-  info: (message: string, metadata?: Record<string, any>) => {
+  info: (message: string, metadata?: Record<string, string | number | boolean>) => {
     if (isDevelopment) {
       console.log(`[INFO] ${message}`, metadata || '')
     }
@@ -28,14 +28,14 @@ export const logger = {
   /**
    * Log warnings
    */
-  warn: (message: string, metadata?: Record<string, any>) => {
+  warn: (message: string, metadata?: Record<string, string | number | boolean>) => {
     console.warn(`[WARN] ${message}`, metadata || '')
   },
 
   /**
    * Log errors (always logged)
    */
-  error: (message: string, error?: any, metadata?: Record<string, any>) => {
+  error: (message: string, error?: unknown, metadata?: Record<string, string | number | boolean>) => {
     const errorInfo = {
       message,
       error: error?.message || error,
@@ -48,7 +48,7 @@ export const logger = {
   /**
    * Log security-related events (always logged)
    */
-  security: (event: string, userId?: string, metadata?: Record<string, any>) => {
+  security: (event: string, userId?: string, metadata?: Record<string, string | number | boolean>) => {
     const securityEvent = {
       event,
       userId: userId || 'anonymous',
@@ -62,7 +62,7 @@ export const logger = {
   /**
    * Log audit events (always logged)
    */
-  audit: (action: string, userId: string, resource?: string, metadata?: Record<string, any>) => {
+  audit: (action: string, userId: string, resource?: string, metadata?: Record<string, string | number | boolean>) => {
     const auditEvent = {
       action,
       userId,
@@ -77,7 +77,7 @@ export const logger = {
   /**
    * Log database operations (development only)
    */
-  database: (operation: string, table?: string, metadata?: Record<string, any>) => {
+  database: (operation: string, table?: string, metadata?: Record<string, string | number | boolean>) => {
     if (isDevelopment) {
       console.log(`[DB] ${operation}`, { table, ...metadata })
     }
@@ -87,7 +87,7 @@ export const logger = {
 /**
  * Sanitize data for logging - removes sensitive fields
  */
-export function sanitizeForLogging(data: any): any {
+export function sanitizeForLogging(data: unknown): unknown {
   if (!data || typeof data !== 'object') return data
 
   const sensitiveFields = [

@@ -606,7 +606,7 @@ export default function ProfilePage() {
                   {isEditing ? (
                     <select
                       value={formData.playing_style}
-                      onChange={(e) => setFormData(prev => ({ ...prev, playing_style: e.target.value as any }))}
+                      onChange={(e) => setFormData(prev => ({ ...prev, playing_style: e.target.value as 'casual' | 'competitive' | 'beginner_friendly' }))}
                       className="w-full p-3 border border-gray-300 rounded-lg"
                     >
                       <option value="casual">Casual</option>
@@ -624,7 +624,7 @@ export default function ProfilePage() {
                   {isEditing ? (
                     <select
                       value={formData.pace_of_play}
-                      onChange={(e) => setFormData(prev => ({ ...prev, pace_of_play: e.target.value as any }))}
+                      onChange={(e) => setFormData(prev => ({ ...prev, pace_of_play: e.target.value as 'relaxed' | 'moderate' | 'fast' }))}
                       className="w-full p-3 border border-gray-300 rounded-lg"
                     >
                       <option value="relaxed">Relaxed</option>
@@ -642,7 +642,7 @@ export default function ProfilePage() {
                   {isEditing ? (
                     <select
                       value={formData.preferred_group_size}
-                      onChange={(e) => setFormData(prev => ({ ...prev, preferred_group_size: e.target.value as any }))}
+                      onChange={(e) => setFormData(prev => ({ ...prev, preferred_group_size: e.target.value as 'twosome' | 'foursome' | 'flexible' }))}
                       className="w-full p-3 border border-gray-300 rounded-lg"
                     >
                       <option value="twosome">Twosome</option>

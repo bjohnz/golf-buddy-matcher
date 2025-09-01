@@ -159,8 +159,8 @@ function isValidEmail(email: string): boolean {
 /**
  * Get environment summary for debugging
  */
-export function getEnvironmentSummary(): Record<string, any> {
-  const summary: Record<string, any> = {
+export function getEnvironmentSummary(): Record<string, string | boolean | { analytics: boolean; payments: boolean }> {
+  const summary: Record<string, string | boolean | { analytics: boolean; payments: boolean }> = {
     nodeEnv: process.env.NODE_ENV,
     isProduction: process.env.NODE_ENV === 'production',
     isDevelopment: process.env.NODE_ENV === 'development',
@@ -246,11 +246,13 @@ export function generateEnvDocs(): string {
   return docs
 }
 
-export default {
+const envValidation = {
   validateEnvironment,
   validateEnvironmentOnStartup,
   getEnvironmentSummary,
   generateEnvDocs,
   REQUIRED_ENV_VARS,
   OPTIONAL_ENV_VARS
-} 
+}
+
+export default envValidation 

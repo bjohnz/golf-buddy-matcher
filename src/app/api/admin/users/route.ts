@@ -103,7 +103,11 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    let updateData: any = {}
+    let updateData: {
+      is_banned?: boolean;
+      is_active?: boolean;
+      updated_at: string;
+    } = {}
     let logMessage = ''
 
     switch (action) {

@@ -255,7 +255,7 @@ export function getRateLimitInfo(
  * Create rate limiting middleware for API routes
  */
 export function createRateLimitMiddleware(action: keyof typeof RATE_LIMITS) {
-  return (req: any, res: any, next: any) => {
+  return (req: { ip?: string; connection?: { remoteAddress?: string }; headers: Record<string, string | string[] | undefined> }, res: { setHeader: (name: string, value: string | number) => void; status: (code: number) => { json: (data: unknown) => void } }, next: () => void) => {
     // Get identifier (IP address, user ID, etc.)
     const identifier = req.ip || 
                       req.connection?.remoteAddress || 
@@ -331,7 +331,7 @@ export function getClientIdentifier(): string {
   return 'server_unknown'
 }
 
-export default {
+const rateLimit = {
   checkRateLimit,
   recordSuccess,
   blockIdentifier,
@@ -341,3 +341,5 @@ export default {
   getClientIdentifier,
   RATE_LIMITS
 }
+
+export default rateLimit

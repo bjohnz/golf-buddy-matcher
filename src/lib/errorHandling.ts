@@ -35,7 +35,7 @@ export interface SafeError {
   message: string
   code?: string
   type: string
-  details?: Record<string, any>
+  details?: Record<string, string | number | boolean>
   timestamp: string
   requestId?: string
 }
@@ -44,13 +44,13 @@ export interface ErrorContext {
   userId?: string
   action?: string
   resource?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, string | number | boolean>
 }
 
 /**
  * Sanitize error message to remove sensitive information
  */
-export function sanitizeErrorMessage(error: any): string {
+export function sanitizeErrorMessage(error: unknown): string {
   if (typeof error === 'string') {
     return sanitizeString(error)
   }
@@ -101,7 +101,7 @@ function sanitizeString(message: string): string {
  * Create a safe error object for client consumption
  */
 export function createSafeError(
-  error: any,
+  error: unknown,
   context: ErrorContext = {},
   userMessage?: string
 ): SafeError {
@@ -194,7 +194,7 @@ export class ErrorBoundary extends Error {
 /**
  * Handle API response errors safely
  */
-export function handleApiError(response: any, defaultMessage?: string): never {
+export function handleApiError(response: Response | { status?: number; statusText?: string }, defaultMessage?: string): never {
   const context: ErrorContext = {
     action: 'api_request',
     metadata: {
@@ -241,7 +241,7 @@ export function handleApiError(response: any, defaultMessage?: string): never {
  * React hook for error handling
  */
 export function useErrorHandler() {
-  const handleError = (error: any, context: ErrorContext = {}, userMessage?: string) => {
+  const handleError = (error: unknown, context: ErrorContext = {}, userMessage?: string) => {
     const safeError = createSafeError(error, context, userMessage)
     
     // In development, also log to console for debugging
@@ -267,7 +267,7 @@ export function useErrorHandler() {
   }
 }
 
-export default {
+const errorHandling = {
   createSafeError,
   sanitizeErrorMessage,
   withErrorHandling,
@@ -276,3 +276,5 @@ export default {
   GENERIC_ERROR_MESSAGES,
   SAFE_ERROR_TYPES
 }
+
+export default errorHandling

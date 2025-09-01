@@ -95,7 +95,12 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    const updateData: any = {
+    const updateData: {
+      status: string;
+      updated_at: string;
+      admin_notes?: string;
+      resolved_at?: string;
+    } = {
       status,
       updated_at: new Date().toISOString()
     }
