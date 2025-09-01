@@ -439,7 +439,17 @@ export class ProfileService {
 
       // Query update history from database (real client only)
       try {
-        const result = await (supabase as unknown as any)
+        const result = await (supabase as unknown as { 
+          from(table: string): { 
+            select(columns: string): { 
+              eq(column: string, value: string): { 
+                order(column: string, options: { ascending: boolean }): { 
+                  limit(count: number): Promise<{ error: unknown; data: unknown }> 
+                } 
+              } 
+            } 
+          } 
+        })
           .from('profile_update_logs')
           .select('*')
           .eq('profile_id', userId)
