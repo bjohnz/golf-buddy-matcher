@@ -162,27 +162,27 @@ export class SafetyService {
   static getReportReasons(): { value: ReportReason; label: string; description: string }[] {
     return [
       {
-        value: 'inappropriate_behavior',
+        value: ReportReason.INAPPROPRIATE_BEHAVIOR,
         label: 'Inappropriate Behavior',
         description: 'Offensive, threatening, or inappropriate conduct'
       },
       {
-        value: 'fake_profile',
+        value: ReportReason.FAKE_PROFILE,
         label: 'Fake Profile',
         description: 'Fake photos, false information, or impersonation'
       },
       {
-        value: 'harassment',
+        value: ReportReason.HARASSMENT,
         label: 'Harassment',
         description: 'Repeated unwanted contact or harassment'
       },
       {
-        value: 'spam',
+        value: ReportReason.SPAM,
         label: 'Spam',
         description: 'Unwanted commercial messages or spam'
       },
       {
-        value: 'other',
+        value: ReportReason.OTHER,
         label: 'Other',
         description: 'Other violations of our community guidelines'
       }

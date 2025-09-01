@@ -1,6 +1,25 @@
 -- Database Migration for Premium Features
 -- Run this in your Supabase SQL editor
 
+-- 0. Create profiles table first (if it doesn't exist)
+CREATE TABLE IF NOT EXISTS profiles (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  user_id TEXT UNIQUE NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  bio TEXT,
+  handicap INTEGER,
+  location TEXT,
+  preferred_times JSONB DEFAULT '[]',
+  playing_style TEXT,
+  pace_of_play TEXT,
+  group_size_preference TEXT,
+  is_verified BOOLEAN DEFAULT false,
+  is_banned BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- 1. Add subscription fields to profiles table
 ALTER TABLE profiles 
 ADD COLUMN IF NOT EXISTS subscription_tier TEXT DEFAULT 'free' CHECK (subscription_tier IN ('free', 'premium')),
@@ -71,7 +90,48 @@ CREATE TABLE IF NOT EXISTS incoming_likes (
   UNIQUE(liker_id, liked_user_id)
 );
 
--- 7. Insert default subscription plans
+-- 7. Create swipes table
+CREATE TABLE IF NOT EXISTS swipes (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  swiper_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  swiped_user_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  direction TEXT NOT NULL CHECK (direction IN ('left', 'right', 'up', 'down')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(swiper_id, swiped_user_id)
+);
+
+-- 8. Create matches table
+CREATE TABLE IF NOT EXISTS matches (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  user1_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  user2_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user1_id, user2_id)
+);
+
+-- 9. Create reports table
+CREATE TABLE IF NOT EXISTS reports (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  reporter_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  reported_user_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  reason TEXT CHECK (reason IN ('inappropriate_behavior', 'fake_profile', 'harassment', 'spam', 'other')),
+  description TEXT,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'reviewed', 'resolved', 'dismissed')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 10. Create blocks table
+CREATE TABLE IF NOT EXISTS blocks (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  blocker_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  blocked_user_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  reason TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(blocker_id, blocked_user_id)
+);
+
+-- 11. Insert default subscription plans
 INSERT INTO subscription_plans (id, name, tier, price, billing_period, features, limits, is_popular) VALUES
 (
   'free',
@@ -167,7 +227,7 @@ CREATE POLICY "incoming_likes_update_policy" ON incoming_likes
   FOR UPDATE USING (auth.uid()::text = liked_user_id);
 
 -- 10. Create functions for subscription management
-CREATE OR REPLACE FUNCTION get_user_subscription(user_id TEXT)
+CREATE OR REPLACE FUNCTION get_user_subscription(input_user_id TEXT)
 RETURNS TABLE (
   id TEXT,
   user_id TEXT,
@@ -196,7 +256,7 @@ BEGIN
     us.created_at,
     us.updated_at
   FROM user_subscriptions us
-  WHERE us.user_id = get_user_subscription.user_id
+  WHERE us.user_id = input_user_id
     AND us.status = 'active'
   ORDER BY us.created_at DESC
   LIMIT 1;
@@ -204,7 +264,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to get daily usage
-CREATE OR REPLACE FUNCTION get_daily_usage(user_id TEXT, usage_date DATE)
+CREATE OR REPLACE FUNCTION get_daily_usage(input_user_id TEXT, usage_date DATE)
 RETURNS TABLE (
   id TEXT,
   user_id TEXT,
@@ -227,8 +287,8 @@ BEGIN
     du.created_at,
     du.updated_at
   FROM daily_usage du
-  WHERE du.user_id = get_daily_usage.user_id
-    AND du.date = get_daily_usage.usage_date;
+  WHERE du.user_id = input_user_id
+    AND du.date = usage_date;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -368,7 +428,7 @@ ADD COLUMN IF NOT EXISTS notification_preferences JSONB DEFAULT '{"new_matches":
 ALTER TABLE reports 
 ADD COLUMN IF NOT EXISTS reason TEXT CHECK (reason IN ('inappropriate_behavior', 'fake_profile', 'harassment', 'spam', 'other')),
 ALTER COLUMN status SET DEFAULT 'pending',
-ALTER COLUMN status TYPE TEXT CHECK (status IN ('pending', 'reviewed', 'resolved', 'dismissed'));
+ALTER COLUMN status TYPE TEXT;
 
 -- Create indexes for safety features
 CREATE INDEX IF NOT EXISTS idx_profiles_is_banned ON profiles(is_banned);

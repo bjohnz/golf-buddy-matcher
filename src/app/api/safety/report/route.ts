@@ -19,9 +19,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!Object.values(ReportReason).includes(reason)) {
+    const validReasons = Object.values(ReportReason);
+    if (!validReasons.includes(reason as ReportReason)) {
       return NextResponse.json(
-        { error: 'Invalid report reason' },
+        { error: `Invalid report reason. Valid reasons are: ${validReasons.join(', ')}` },
         { status: 400 }
       )
     }

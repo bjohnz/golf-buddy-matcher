@@ -113,12 +113,13 @@ export interface Report {
   status: 'pending' | 'reviewed' | 'resolved'
 }
 
-export type ReportReason = 
-  | 'inappropriate_behavior'
-  | 'fake_profile'
-  | 'harassment'
-  | 'spam'
-  | 'other'
+export enum ReportReason {
+  INAPPROPRIATE_BEHAVIOR = 'inappropriate_behavior',
+  FAKE_PROFILE = 'fake_profile',
+  HARASSMENT = 'harassment',
+  SPAM = 'spam',
+  OTHER = 'other'
+}
 
 // Block Types
 export interface BlockedUser {
